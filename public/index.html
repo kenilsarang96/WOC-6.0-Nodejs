@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Pictionary Game</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="utility.css">
+</head>
+
+<body>
+
+    <div id="loginpage" class ="flex-column justifyandalign">
+        <div class="container flex flex-column justifyandalign gap-10">
+
+            <div class="name">
+                <p>The Pictionary Game - Play with Friends</p>
+            </div>
+
+
+
+            <div class="createRoom box">
+
+                <form id="create-room" class="flex flex-column justifyandalign gap-5" action="">
+
+
+                    <div class="box-name">
+                        Create Room</div>
+                    <label for="username" class="small">Username:</label>
+                    <input type="text" id="create-room-username" name="username" placeholder="Enter your username">
+                    <button id="create-room-btn">Create Room </button>
+
+
+                </form>
+
+
+            </div>
+
+            <div class="line">
+
+            </div>
+            <div class="joinRoom box">
+
+                <form id="join-room" action="" class="flex flex-column justifyandalign gap-5">
+                    <div class="box-name">
+                        Join room
+                    </div>
+                    <label for="username" class="small">Username:</label>
+                    <input type="text" id="join-room-username" name="" placeholder="Enter your username">
+                    <label for="room-id" class="small">Room ID:</label>
+                    <input type="text" id="room-id" name="room-id" placeholder="Enter room ID">
+                    <button id="join-room-btn">Join Room</button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div id="Game">
+        <div class="container flex gap-20">
+
+            <div class="left flex flex-column gap-20">
+
+                <div class="allusers border">
+
+                </div>
+                <div class="btns flex flex-column">
+                    <button>Start</button>
+                    <button id="displayroomid"></button>
+                    <button id="leavebtn">Leave</button>
+                </div>
+            </div>
+
+
+
+            <div class="center flex flex-column gap-20">
+                <div class="task border">
+
+                </div>
+                <div class="canvas border">
+
+                </div>
+                <div class="settings border">
+
+                </div>
+            </div>
+
+            <div class="right border flex flex-column gap-20">
+
+                <div class="chats">
+                    <ul id="messages">
+
+                    </ul>
+                </div>
+                <div class="msg-bar flex justifyandalign gap-5">
+
+                    <input type="text"  id="msg" class="border" placeholder="type your messages...">
+                    <button class="border" id="send-btn">send</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

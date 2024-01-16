@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+}
+body{
+    font-family: 'Poppins', sans-serif;
+}
+
+/* .master{
+   position: relative;
+
+} */
+
+#loginpage{
+  color: #f8f9f8;
+  width: 99vw;
+
+ }
+.container{
+    margin-top: 7%;
+    color: #f8f9f8;
+}
+
+.name{
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: black;
+}
+.box-name{
+    font-size: 18px;
+    font-weight: 600;
+    
+}
+
+.small{
+    font-size: 12px;
+    color: rgb(135, 139, 139);
+}
+
+.line{
+    height: 1px;
+    background-color: black;
+    width: 20%;
+}
+.box{
+    background-color: rgba(26, 25, 24, 0.882);
+    padding: 17px 20px;
+    border: solid black 0px;
+    border-radius: 5px;
+}
+
+input{
+    padding: 9px;
+    width: 307px;
+    border: solid black 0px;
+    border-radius: 5px;
+    background-color: rgba(35, 37, 37, 0.997);
+    color: #f8f9f8;
+}
+
+button{
+    margin-top: 6px;
+    padding: 7px;
+    background-color: #1ae58d;
+    border:solid black 0px;
+    border-radius: 5px;
+    font-weight: 800;
+    font-size: 12px;
+    color: rgb(46, 43, 43);
+    cursor: pointer;
+
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap');
+
+*{
+  margin: 0px;
+  padding: 0px;
+}
+
+#Game{
+    position: absolute;
+    top: 0;
+    width: 99vw;
+    visibility: hidden;
+    color: black;
+}
+
+
+
+.container{
+  height: 96vh;
+  margin: 10px;
+}
+
+.left{
+  height: 96vh;
+  width: 20vw;
+}
+
+
+
+
+
+.allusers{
+    height: 80vh;
+    width: 20vw;
+}
+
+.btns{
+  align-items: center;
+  justify-content: center;
+  gap: 23px;
+}
+
+.btns button{
+  padding: 16px;
+    width: 17vw;
+}
+.center{
+  height: 96vh;
+  width: 55vw;
+}
+
+.task{
+  height: 15vh;
+}
+.canvas{
+  height: 60vh;
+}
+.settings{
+  height: 20vh;
+}
+
+.right{
+  height: 96vh;
+  width: 25vw;
+}
+
+.chats{
+  height: 80vh;
+}
+
+.msg-bar{
+  padding-top: 20px;
+}
+
+.msg-bar input{
+  padding: 14px;
+  width: 12vw;
+
+}
+.msg-bar button{
+  padding: 14px;
+  width: 4vw;
+
+}
+
+#messages{
+    padding: 15px 26px;
+}
+#messages li{
+     list-style-type: none;
+     color: blue;
+}

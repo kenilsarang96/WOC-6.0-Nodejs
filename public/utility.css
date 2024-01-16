@@ -1,0 +1,33 @@
+.flex{
+    display: flex;
+}
+
+.flex-column{
+    flex-direction: column;
+}
+
+.justifyandalign{
+    justify-content: center;
+    align-items: center;
+}
+.gap-20{
+    gap: 20px;
+}
+.gap-10{
+    gap: 10px;
+}
+.gap-5{
+    gap: 5px;
+}
+
+.red{
+    background-color: red;
+}
+.blue{
+    background-color: blue;
+}
+
+.border{
+    border: solid black 2px;
+    border-radius: 10px;
+}
