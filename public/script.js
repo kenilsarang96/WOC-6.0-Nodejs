@@ -1,6 +1,6 @@
 const socket = io();
 
-const userid = document.getElementById('create-room-username');
+const userid = document.getElementById('create-room-username'); // creater
 
 const form1 = document.getElementById('create-room');
 
@@ -11,7 +11,7 @@ const usermsg = document.getElementById('msg');
 const sendbtn = document.getElementById('send-btn');
 const messages = document.getElementById('messages');
 
-const joinroomusername = document.getElementById('join-room-username');
+const joinroomusername = document.getElementById('join-room-username'); //joiner
 const roomid = document.getElementById('room-id');
 const joinbtn = document.getElementById('join-room-btn');
 const leave_btn = document.getElementById('leavebtn');
@@ -31,7 +31,7 @@ form1.addEventListener('submit',(e)=>{
         socket.emit('create-room',userid.value,msg=>{
             displayMessage(msg);
         });
-        loginpage.style.visibility = 'hidden';
+        loginpage.style.visibility = 'hidden';    
          game.style.visibility = 'visible'
         //  userid.value='';
         }
@@ -52,6 +52,7 @@ form1.addEventListener('submit',(e)=>{
         item.style.fontWeight ='bold';
         messages.appendChild(item);
         window.scrollTo(0, document.body.scrollHeight);
+        
         
        })
 
@@ -106,9 +107,10 @@ form2.addEventListener('submit',(e)=>{
 
 
 leave_btn.addEventListener('click',(e)=>{
-    socket.emit('leave-room',id,Username);
+    socket.emit('leave-room',id,userid.value);
     loginpage.style.visibility = 'visible';
     game.style.visibility = 'hidden'
+    // messages.innerHTML='';
 })
 
         
