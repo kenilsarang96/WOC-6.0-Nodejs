@@ -7,6 +7,7 @@
 }
 body{
     font-family: 'Poppins', sans-serif;
+    background-color: black;
 }
 
 /* .master{
@@ -17,7 +18,6 @@ body{
 #loginpage{
   color: #f8f9f8;
   width: 99vw;
-
  }
 .container{
     margin-top: 7%;
@@ -28,7 +28,7 @@ body{
     font-size: 22px;
     font-weight: bold;
     margin-bottom: 10px;
-    color: black;
+    color: white;
 }
 .box-name{
     font-size: 18px;
@@ -73,6 +73,11 @@ button{
     color: rgb(46, 43, 43);
     cursor: pointer;
     
+}
+
+button:hover{
+    transform: scale(1.05,1.05);
+    transition: ease-in-out;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
@@ -163,10 +168,16 @@ button{
 
 #messages{
     padding: 15px 26px;
+  }
+.chats{
+  overflow: auto;
+
 }
 #messages li{
      list-style-type: none;
      color: blue;
+     white-space: normal; 
+     word-wrap: break-word;
 }
 
 #displayroomid{
