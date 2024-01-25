@@ -26,9 +26,6 @@
 .blue{
     background-color: blue;
 }
-.white{
-    background-color: rgb(252, 252, 252);
-}
 
 .border{
     border: solid black 2px;
@@ -37,8 +34,4 @@
 
 .grey{
     background-color: rgba(35, 37, 37, 0.997);
-}
-
-.pos-relative{
-    position: relative;
 }
