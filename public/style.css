@@ -129,22 +129,26 @@ button:hover{
 }
 .center{
   height: 96vh;
-  width: 55vw;
+  width: 50vw;
 }
 
 .task{
   height: 15vh;
 }
 .canvas{
-  height: 60vh;
+  height: 50vh;
 }
 .settings{
-  height: 20vh;
+  height: 25vh;
+  justify-content: center;
+  align-items: center;
+  gap:37px;
 }
 
 .right{
   height: 96vh;
-  width: 25vw;
+  width: 30vw;
+
 }
 
 .chats{
@@ -187,4 +191,23 @@ button:hover{
   background-color: red;
 
 }
+.all-user-info{
+  margin-top: 10px;
+  margin-left: 13px;
+}
+.allusers > :nth-child(even){
+  background-color: #2e302e;
+}
 
+
+
+
+ #brush-color{
+  width: 17vw;
+  height: 9vh;
+} 
+
+.brush button{
+  padding: 16px;
+  width: 17vw;
+}
