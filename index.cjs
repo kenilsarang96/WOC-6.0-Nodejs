@@ -101,7 +101,7 @@ io.on("connection", (socket) => {
   socket.on('change-b_size',(b_size,id)=>{
     
     for (let i = 0; i < user_names.length; i++) {
-      if (user_names[i][0] != id) continue;
+      if (user_names[i][0] !==id) continue;
       io.to(id).emit("apply-b_size",b_size);
     }
 
@@ -109,7 +109,7 @@ io.on("connection", (socket) => {
   socket.on('change-b_color',(b_color,id)=>{
     
     for (let i = 0; i < user_names.length; i++) {
-      if (user_names[i][0] != id) continue;
+      if (user_names[i][0] !=id) continue;
       io.to(id).emit("apply-b_color",b_color);
     }
 
@@ -121,6 +121,17 @@ io.on("connection", (socket) => {
       io.to(id).emit("apply-erase",id);
     }
 
+  });
+
+
+  socket.on('change-svg-to-write',(id,Username)=>{
+
+    io.to(id).emit('change-it-to-write',id,Username,user_names);
+  });
+
+  socket.on('change-svg-to-user',(id,Username)=>{
+
+    io.to(id).emit('change-it-to-user',id,Username,user_names);
   });
 
 });

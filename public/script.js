@@ -135,6 +135,7 @@ socket.on('add-info-in-panel',(roomid,username,user_names,user_cnt)=>{
  for (let i = 0; i< user_names.length; i++) {
     if(user_names[i][0]!=roomid) continue;
   let item = document.createElement('div');
+  item.id=`user_${roomid}_${user_names[i][1]}`;
  item.style.color = 'white'
  item.innerHTML=` <div class="flex gap-10 all-user-info"><img src="images/user.svg" alt=""><div></div>${user_names[i][1]}</div>`;
 
@@ -190,6 +191,8 @@ let mouseDown = false;
 window.onmousedown = (e) => {
     x = e.clientX - rect.left;
     y = e.clientY - rect.top;
+
+    socket.emit('change-svg-to-write',id,userid.value);
     socket.emit('down',x,y,id);
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -198,7 +201,28 @@ window.onmousedown = (e) => {
 
 window.onmouseup = (e) => {
     mouseDown = false;
+    socket.emit('change-svg-to-user',id,userid.value);
 };
+
+socket.on('change-it-to-write',(id,Username,user_names)=>{
+
+   let user_div =  document.getElementById(`user_${id}_${Username}`);
+   if (user_div) {
+    user_div.querySelector('img').src = 'images/pen.svg';
+    console.log(`user_${id}_${Username}`);
+}
+
+})
+socket.on('change-it-to-user',(id,Username,user_names)=>{
+
+    console.log(Username);
+    let user_div =  document.getElementById(`user_${id}_${Username}`);
+    if (user_div) {
+     user_div.querySelector('img').src = 'images/user.svg';
+     console.log(`user_${id}_${Username}`);
+    }
+})
+
 
 
 socket.on('ondraw',(x,y)=>{
@@ -212,9 +236,13 @@ socket.on('ondown',(x,y)=>{
 
 socket.on('apply-b_size',(e)=>{
     ctx.lineWidth =e;
+    brush_size.value =e;
+    b_size=e;
 })
 socket.on('apply-b_color',(e)=>{
     ctx.strokeStyle =e;
+    brush_color.value =e;
+    b_color =e;
 })
 window.onmousemove = (e) => {
     x = e.clientX - rect.left;
