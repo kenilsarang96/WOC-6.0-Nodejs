@@ -24,6 +24,11 @@ Go to the project directory
 ```bash
   cd WOC-6.0-Nodejs
 ```
+Install nodemon
+
+```bash
+   npm i nodemon
+```
 
 Install dependencies
 

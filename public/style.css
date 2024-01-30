@@ -7,8 +7,11 @@
 }
 body{
     font-family: 'Poppins', sans-serif;
-    background-color:  #1E2761;
+    background-color:  #000000;
     /* background-color: #E3B448; */
+    overflow: hidden;
+    cursor: pointer;
+    color: #f8f9f8;
 }
 
 /* .master{
@@ -136,6 +139,9 @@ button:hover{
 
 .task{
   height: 15vh;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
 }
 .canvas{
   height: 50vh;
@@ -211,3 +217,33 @@ button:hover{
   padding: 16px;
   width: 17vw;
 }
+
+
+   #video-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 0.8;
+        }
+
+
+
+ #at_start{
+  position: absolute;
+  top: 0;
+  width: 99vw;
+  height: 98vh;
+  visibility: hidden;
+  color: rgb(255, 253, 253);
+  justify-content: center;
+  align-items: center;
+  gap:10px;
+  z-index: 100;
+  background-color: black;
+    opacity: 0.8;
+ }      
+
