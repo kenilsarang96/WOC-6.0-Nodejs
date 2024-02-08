@@ -41,4 +41,7 @@ Start the server
 ```bash
   npm start
 ```
+## Screenshots
+![Screenshot (102)](https://github.com/kenilsarang96/WOC-6.0-Nodejs/assets/119804321/71ec9c86-dec5-4b09-97a2-2b137590b352)
 
+![Screenshot (103)](https://github.com/kenilsarang96/WOC-6.0-Nodejs/assets/119804321/394dab68-1eff-4026-8901-2436d4b9424a)

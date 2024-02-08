@@ -123,11 +123,25 @@
 
     </div>
 
-    <div id="at_start" class="flex flex-column">
+    <div id="at_start" class="flex flex-column drops">
         <div id="who_are_drawing"></div>
         <div id="display_word"></div>
         <div id="who_have_to_guess"></div>
         <div id="timer_of_msg"></div>
+    </div>
+
+    <div id="match_over" class="flex flex-column drops">
+         <div class="bigsize">Match over</div>
+         <div id="Guess_word"></div>
+         <div>Time out</div>
+         <div id="player_scores" class="flex flex-column justifyandalign gap-5"></div>
+    </div>
+
+    <div id="game_over" class="flex flex-column drops">
+         <div class="bigsize">Game over - Final leaderboard</div>
+         <div>Final scores</div>
+         <div id="final_scores" class="flex flex-column justifyandalign gap-5"></div>
+         <button id="startbtn-newgame">Start New game</button>
     </div>
 
     <script src="socket.io/socket.io.js"></script>

@@ -11,6 +11,7 @@ body{
     /* background-color: #E3B448; */
     overflow: hidden;
     cursor: pointer;
+
     color: #f8f9f8;
 }
 
@@ -232,18 +233,42 @@ button:hover{
 
 
 
- #at_start{
+ 
+.drops{
   position: absolute;
   top: 0;
   width: 99vw;
   height: 98vh;
-  visibility: hidden;
+  
   color: rgb(255, 253, 253);
   justify-content: center;
   align-items: center;
   gap:10px;
   z-index: 100;
   background-color: black;
-    opacity: 0.8;
- }      
+    opacity: 0.9;
 
+}
+
+#info-name{
+  width: 58px;
+}
+
+.width-58{
+  width: 58px;
+}
+#at_start{
+  visibility: hidden;
+}
+#match_over{
+  visibility: hidden;
+}
+#game_over{
+  visibility: hidden;
+   z-index: 200;
+}
+
+#startbtn-newgame
+{
+  opacity: 1;
+}

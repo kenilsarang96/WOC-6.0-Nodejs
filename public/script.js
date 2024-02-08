@@ -133,7 +133,13 @@ socket.on('add-info-in-panel',(roomid,username,user_names,user_cnt)=>{
   let item = document.createElement('div');
   item.id=`user_${roomid}_${user_names[i][1]}`;
  item.style.color = 'white'
- item.innerHTML=` <div class="flex gap-10 all-user-info"><img src="media/user.svg" alt=""><div></div>${user_names[i][1]}</div>`;
+ item.innerHTML=` <div class="flex gap-40 all-user-info"><img src="media/user.svg" width = "27px" alt="">
+                  <div id="info-name">${user_names[i][1]}</div>
+                  <div id="user_${roomid}_${user_names[i][1]}_score">0 </div>
+                  
+                  
+                  </div>
+                  `;
 
   user_panel.appendChild(item);
      }
@@ -268,6 +274,10 @@ socket.on('change-vis-of-start',(id)=>{
     start_display.style.visibility ="visible";
 })
 
+
+
+
+
 socket.on('change-vis-of-start_to_hide',(id,name)=>{
     start_display.style.visibility ="hidden";
     console.log(name);
@@ -322,7 +332,8 @@ socket.on('show_chat', (msg,useriD,originalMsg) => {
         item.textContent  = ` ${useriD} has correctly guessed !`;
         item.style.color = "orange";
         item.style.fontWeight ="bold";
-        
+        socket.emit("update_score",useriD,id);
+        // socket.emit("change-score-")
     }
     else item.textContent = msg;
 
@@ -350,8 +361,82 @@ socket.on('change-it-to-write',(id,Username,user_names)=>{
      }
  })
 
-
- 
-
+ let match_over  = document.getElementById("match_over");
 
 
+socket.on('change-vis-of-match_over',(id)=>{
+    match_over.style.visibility ="visible";
+
+    socket.emit("change-vis-of-match_over-hide",id);
+})
+socket.on('change-vis-of-match_over-to-hide',(id)=>{
+    match_over.style.visibility ="hidden";
+})
+
+
+let gameOver = document.getElementById("game_over");
+
+socket.on('GAME_OVER',(id)=>{
+    gameOver.style.visibility ="visible";
+    
+})
+socket.on("change-vis-gameover",(id)=>{
+    gameOver.style.visibility ="hidden";
+
+})
+
+let newgame = document.getElementById("startbtn-newgame");
+newgame.addEventListener("click",(e)=>{
+    if(host!=null)
+    {
+    socket.emit("start_game",id);
+    }
+})
+
+
+//score distribution
+
+
+let match_scores = document.getElementById("player_scores");
+let final_score = document.getElementById("final_scores");
+
+
+socket.on('add-score-in-match_over',(roomid,all_room_members,scores)=>{
+   
+    match_scores.innerHTML="";
+    final_score.innerHTML="";
+    
+    for (let i = 0; i< all_room_members.length; i++) {
+
+     let item = document.createElement('div');
+     let panel_item_score = document.getElementById(`user_${roomid}_${all_room_members[i]}_score`);
+
+     panel_item_score.innerText = "";
+     panel_item_score.innerText = scores[i];
+
+    item.style.color = 'white'
+    item.innerHTML=` <div class="flex gap-40">
+                     <div class="width-58">${all_room_members[i]}</div>                    
+                     <div >${scores[i]}</div>                    
+                     
+                     </div>
+                     `;
+   
+                     match_scores.appendChild(item);
+    
+                   let clonedItem = item.cloneNode(true);
+                     final_score.appendChild(clonedItem);
+        }
+   
+   })
+
+
+   socket.on("reset-scores",(all_room_members,scores,id)=>{
+         for (let i = 0; i < all_room_members.length; i++) {
+         
+            let panel_item_score = document.getElementById(`user_${id}_${all_room_members[i]}_score`);
+
+            panel_item_score.innerText = "";
+            panel_item_score.innerText = scores[i];
+         }
+   })

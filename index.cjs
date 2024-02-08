@@ -27,6 +27,9 @@ let connections = [];
 
 let user_cnt = 0;
 
+let all_room_members = [];
+
+let scores =[];
 
 
 io.on("connection", (socket) => {
@@ -144,24 +147,50 @@ io.on("connection", (socket) => {
     io.to(id).emit('change-it-to-user',id,Username,user_names);
   });
 
+  socket.on("change-vis-of-match_over-hide",(id)=>{
+    setTimeout(()=>{
+      io.to(id).emit('change-vis-of-match_over-to-hide',id);
+    },(7.5)*1000);
+  })
 
+  socket.on("update_score",(useriD,id)=>{
+
+     for (let i = 0; i < all_room_members.length; i++) {
+        if(useriD==all_room_members[i])
+        {
+          scores[i] = scores[i] +100;
+          break;
+        }
+     }
+  })
+ 
+  
+  
   socket.on("start_game",(id)=>{
     let cnt = 5;
-    let round_duration = 60;
-  
-    let all_room_members = [];
-    
-    for (let i = 0; i < user_names.length; i++) {
-      if (user_names[i][0] != id) continue;
-      
-      all_room_members.push(user_names[i][1]);
+    let round_duration = 20;
+     all_room_members = [];
+     scores =[];
+   io.to(id).emit("change-vis-gameover",id);
+   for (let i = 0; i < user_names.length; i++) {
+     if (user_names[i][0] != id) continue;
+     
+     all_room_members.push(user_names[i][1]);
     }
 
+
+    
+    
+    
     let players = all_room_members.length;
-
+    
+    for (let i = 0; i < players; i++) {
+      scores.push(0);
+    }
     let turn = 0;
-
-
+    
+    io.to(id).emit("reset-scores",all_room_members,scores,id);
+    
     
     const slug = generateSlug(1, { format: "title" });
     io.to(id).emit('show_word_to_drawer',id,slug,all_room_members[turn]);
@@ -169,17 +198,20 @@ io.on("connection", (socket) => {
 
     setTimeout(() => {
        
-
       io.to(id).emit("change-vis-of-start_to_hide",id,all_room_members[turn]);
       turn = turn+1;
      
-      countdown(round_duration,id,"change-div-of-word-timer");
+      countdown(round_duration,id,"change-div-of-word-timer")
+      
+       
+        
+      
 
        }, cnt*1000);
        countdown(cnt,id,"change-div-of-timermsg");
 
-  
-
+      
+     
 
            const interval = setInterval(() => {
                 
@@ -191,7 +223,10 @@ io.on("connection", (socket) => {
             
               io.to(id).emit("change-vis-of-start_to_hide",id,all_room_members[turn]);
               countdown(round_duration,id,"change-div-of-word-timer");
-             
+              setTimeout(()=>{
+                io.to(id).emit('change-vis-of-match_over-to-hide',id);
+              },8*1000);
+        
                turn++;
  
                 }, cnt*1000);
@@ -199,13 +234,14 @@ io.on("connection", (socket) => {
   
              countdown(cnt,id,"change-div-of-timermsg");
 
-           }, (cnt+ round_duration)*1000);
+           }, (cnt+ round_duration+8)*1000);
      
 
 
        setTimeout(() => {
+           io.to(id).emit("GAME_OVER",id);
            clearInterval(interval);
-       }, (cnt+ round_duration)*1000*(players));
+       }, (cnt+ round_duration+8)*1000*(players));
 
 
   })
@@ -213,7 +249,7 @@ io.on("connection", (socket) => {
 
   
 function countdown(seconds,id,whatmsg) {
-  return new Promise((resolve, reject) => {
+  // return new Promise((resolve, reject) => {
       let rem = seconds;
       io.to(id).emit(whatmsg,rem,id);
 
@@ -222,11 +258,16 @@ function countdown(seconds,id,whatmsg) {
           io.to(id).emit(whatmsg,rem,id);
 
           if (rem <= 0) {
-              clearInterval(interval);
-              resolve(); 
+             if(whatmsg=="change-div-of-word-timer")
+             {
+              io.to(id).emit('change-vis-of-match_over',id);
+              io.to(id).emit('add-score-in-match_over',id,all_room_members,scores);
+             }
+              clearInterval(interval)
           }
       }, 1000);
-  });
+  // });
+  // return 1;
 }
 
 });
