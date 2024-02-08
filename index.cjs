@@ -32,6 +32,9 @@ let all_room_members = [];
 let scores =[];
 
 
+let alldata={};
+
+
 io.on("connection", (socket) => {
   console.log(socket.id);
   console.log(connections);
@@ -50,6 +53,8 @@ io.on("connection", (socket) => {
   socket.on("join-room", (roomid, username, callback) => {
     connections.push(socket.id);
     user_names.push([roomid, username]);
+
+    if(alldata[roomid])alldata[roomid].push([username,0]);
     socket.join(roomid);
     io.to(roomid).emit("displayroom-id", roomid, username);
     //  callback(`${username} is joined`);
@@ -70,6 +75,7 @@ io.on("connection", (socket) => {
     let roomid = socket.id.substring(0, 5);
     user_names.push([roomid, username]);
 
+    alldata[roomid] = [[username,0]];
     socket.join(roomid);
     //  callback(`${userid} is joined`);
     io.to(roomid).emit("displayroom-id", roomid, username);
@@ -155,50 +161,51 @@ io.on("connection", (socket) => {
 
   socket.on("update_score",(useriD,id)=>{
 
-     for (let i = 0; i < all_room_members.length; i++) {
-        if(useriD==all_room_members[i])
+     for (let i = 0; i < alldata[id].length; i++) {
+        if(useriD==alldata[id][i][0])
         {
-          scores[i] = scores[i] +100;
+          alldata[id][i][1] = alldata[id][i][1] +100;
           break;
         }
      }
   })
  
-  
+  // alldata[id] = [[username,0],[username,0]]
   
   socket.on("start_game",(id)=>{
     let cnt = 5;
     let round_duration = 20;
-     all_room_members = [];
-     scores =[];
+    //  all_room_members = [];
+    //  scores =[];
    io.to(id).emit("change-vis-gameover",id);
-   for (let i = 0; i < user_names.length; i++) {
-     if (user_names[i][0] != id) continue;
+  //  for (let i = 0; i < user_names.length; i++) {
+  //    if (user_names[i][0] != id) continue;
      
-     all_room_members.push(user_names[i][1]);
-    }
+  //    all_room_members.push(user_names[i][1]);
+  //   }
 
 
+   
     
     
     
-    let players = all_room_members.length;
+    let players = alldata[id].length;
     
-    for (let i = 0; i < players; i++) {
-      scores.push(0);
-    }
+    // for (let i = 0; i < players; i++) {
+    //   scores.push(0);
+    // }
     let turn = 0;
     
-    io.to(id).emit("reset-scores",all_room_members,scores,id);
+    io.to(id).emit("reset-scores",alldata[id],id);
     
     
     const slug = generateSlug(1, { format: "title" });
-    io.to(id).emit('show_word_to_drawer',id,slug,all_room_members[turn]);
+    io.to(id).emit('show_word_to_drawer',id,slug,alldata[id][turn][0]);
     io.to(id).emit('change-vis-of-start',id);
 
     setTimeout(() => {
        
-      io.to(id).emit("change-vis-of-start_to_hide",id,all_room_members[turn]);
+      io.to(id).emit("change-vis-of-start_to_hide",id,alldata[id][turn][0]);
       turn = turn+1;
      
       countdown(round_duration,id,"change-div-of-word-timer")
@@ -216,12 +223,12 @@ io.on("connection", (socket) => {
            const interval = setInterval(() => {
                 
              const slug = generateSlug(1, { format: "title" });
-             io.to(id).emit("show_word_to_drawer",id,slug,all_room_members[turn]);
+             io.to(id).emit("show_word_to_drawer",id,slug,alldata[id][turn][0]);
              io.to(id).emit('change-vis-of-start',id);
              
             setTimeout(() => {
             
-              io.to(id).emit("change-vis-of-start_to_hide",id,all_room_members[turn]);
+              io.to(id).emit("change-vis-of-start_to_hide",id,alldata[id][turn][0]);
               countdown(round_duration,id,"change-div-of-word-timer");
               setTimeout(()=>{
                 io.to(id).emit('change-vis-of-match_over-to-hide',id);
@@ -261,7 +268,7 @@ function countdown(seconds,id,whatmsg) {
              if(whatmsg=="change-div-of-word-timer")
              {
               io.to(id).emit('change-vis-of-match_over',id);
-              io.to(id).emit('add-score-in-match_over',id,all_room_members,scores);
+              io.to(id).emit('add-score-in-match_over',id,alldata[id]);
              }
               clearInterval(interval)
           }

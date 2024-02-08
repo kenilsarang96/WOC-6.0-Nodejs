@@ -401,7 +401,7 @@ let match_scores = document.getElementById("player_scores");
 let final_score = document.getElementById("final_scores");
 
 
-socket.on('add-score-in-match_over',(roomid,all_room_members,scores)=>{
+socket.on('add-score-in-match_over',(roomid,all_room_members)=>{
    
     match_scores.innerHTML="";
     final_score.innerHTML="";
@@ -409,15 +409,15 @@ socket.on('add-score-in-match_over',(roomid,all_room_members,scores)=>{
     for (let i = 0; i< all_room_members.length; i++) {
 
      let item = document.createElement('div');
-     let panel_item_score = document.getElementById(`user_${roomid}_${all_room_members[i]}_score`);
+     let panel_item_score = document.getElementById(`user_${roomid}_${all_room_members[i][0]}_score`);
 
      panel_item_score.innerText = "";
-     panel_item_score.innerText = scores[i];
+     panel_item_score.innerText = all_room_members[i][1];
 
     item.style.color = 'white'
     item.innerHTML=` <div class="flex gap-40">
-                     <div class="width-58">${all_room_members[i]}</div>                    
-                     <div >${scores[i]}</div>                    
+                     <div class="width-58">${all_room_members[i][0]}</div>                    
+                     <div >${all_room_members[i][1]}</div>                    
                      
                      </div>
                      `;
@@ -431,12 +431,12 @@ socket.on('add-score-in-match_over',(roomid,all_room_members,scores)=>{
    })
 
 
-   socket.on("reset-scores",(all_room_members,scores,id)=>{
+   socket.on("reset-scores",(all_room_members,id)=>{
          for (let i = 0; i < all_room_members.length; i++) {
          
-            let panel_item_score = document.getElementById(`user_${id}_${all_room_members[i]}_score`);
-
+            let panel_item_score = document.getElementById(`user_${id}_${all_room_members[i][0]}_score`);
+            all_room_members[i][1] = 0;
             panel_item_score.innerText = "";
-            panel_item_score.innerText = scores[i];
+            panel_item_score.innerText = all_room_members[i][1];
          }
    })
