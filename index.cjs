@@ -5,8 +5,6 @@ const { Server } = require("socket.io");
 const { generateSlug } = require("random-word-slugs");
 
 
-
-
 const app = express();
 
 const server = createServer(app);
@@ -21,74 +19,51 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-let user_names = [];
 
-let connections = [];
-
-let user_cnt = 0;
-
-let all_room_members = [];
-
-let scores =[];
-
-
+// alldata[id] = [[username1,score],[username2,score]]
+  
 let alldata={};
 
 
 io.on("connection", (socket) => {
   console.log(socket.id);
-  console.log(connections);
+  
 
   console.log("a user is connected");
   
   socket.on("disconnect", () => {
-      const index = connections.indexOf(socket);
-        if (index !== -1) {
-            // Remove the disconnected socket from the connections array
-            connections.splice(index, 1);
-        }
+  
     console.log("user disconnected");
+
+ 
   });
   
   socket.on("join-room", (roomid, username, callback) => {
-    connections.push(socket.id);
-    user_names.push([roomid, username]);
-
+ 
     if(alldata[roomid])alldata[roomid].push([username,0]);
     socket.join(roomid);
     io.to(roomid).emit("displayroom-id", roomid, username);
     //  callback(`${username} is joined`);
     io.to(roomid).emit(
       "add-info-in-panel",
-      roomid,
-      username,
-      user_names,
-      user_cnt
+            alldata[roomid],roomid
     );
-    user_cnt++;
-   
-    console.log(user_names);
   });
 
   socket.on("create-room", (username, callback) => {
-    connections.push(socket.id);
+   
     let roomid = socket.id.substring(0, 5);
-    user_names.push([roomid, username]);
-
+   
     alldata[roomid] = [[username,0]];
     socket.join(roomid);
     //  callback(`${userid} is joined`);
     io.to(roomid).emit("displayroom-id", roomid, username);
     io.to(roomid).emit(
       "add-info-in-panel",
-      roomid,
-      username,
-      user_names,
-      user_cnt
+      alldata[roomid],roomid
     );
-    user_cnt++;
-    console.log(connections);
-    console.log(user_names);
+    
+ 
   });
 
   socket.on('chat', (msg, userid, room) => {
@@ -99,58 +74,58 @@ io.on("connection", (socket) => {
   socket.on("leave-room", (id, Username) => {
     io.to(id).emit("leavemsg", Username);
     socket.leave(id);
+    
+    const indexToRemove = alldata[id].findIndex(entry => entry[0] == Username && entry[1] == 0);
+    if (indexToRemove !== -1) {
+      alldata[id].splice(indexToRemove, 1);
+    }
+    io.to(id).emit("add-info-in-panel",alldata[id],id);
   });
 
   socket.on("draw", (x, y, id) => {
-    for (let i = 0; i < user_names.length; i++) {
-      if (user_names[i][0] != id) continue;
+   
       io.to(id).emit("ondraw", x, y);
-    }
+    
   });
 
 
 
   socket.on("down", (x, y, id) => {
-    for (let i = 0; i < user_names.length; i++) {
-      if (user_names[i][0] != id) continue;
+    
       io.to(id).emit("ondown", x, y);
-    }
+    
   });
   
   socket.on('change-b_size',(b_size,id)=>{
     
-    for (let i = 0; i < user_names.length; i++) {
-      if (user_names[i][0] !==id) continue;
+ 
       io.to(id).emit("apply-b_size",b_size);
-    }
+    
 
   });
   socket.on('change-b_color',(b_color,id)=>{
-    
-    for (let i = 0; i < user_names.length; i++) {
-      if (user_names[i][0] !=id) continue;
+ 
       io.to(id).emit("apply-b_color",b_color);
-    }
+    
 
   });
   socket.on('erase_all',(id)=>{
     
-    for (let i = 0; i < user_names.length; i++) {
-      if (user_names[i][0] != id) continue;
+    
       io.to(id).emit("apply-erase",id);
-    }
+    
 
   });
 
 
   socket.on('change-svg-to-write',(id,Username)=>{
 
-    io.to(id).emit('change-it-to-write',id,Username,user_names);
+    io.to(id).emit('change-it-to-write',id,Username);
   });
 
   socket.on('change-svg-to-user',(id,Username)=>{
 
-    io.to(id).emit('change-it-to-user',id,Username,user_names);
+    io.to(id).emit('change-it-to-user',id,Username);
   });
 
   socket.on("change-vis-of-match_over-hide",(id)=>{
@@ -170,19 +145,13 @@ io.on("connection", (socket) => {
      }
   })
  
-  // alldata[id] = [[username,0],[username,0]]
   
   socket.on("start_game",(id)=>{
     let cnt = 5;
     let round_duration = 20;
-    //  all_room_members = [];
-    //  scores =[];
+    
    io.to(id).emit("change-vis-gameover",id);
-  //  for (let i = 0; i < user_names.length; i++) {
-  //    if (user_names[i][0] != id) continue;
-     
-  //    all_room_members.push(user_names[i][1]);
-  //   }
+  
 
 
    
@@ -191,11 +160,13 @@ io.on("connection", (socket) => {
     
     let players = alldata[id].length;
     
-    // for (let i = 0; i < players; i++) {
-    //   scores.push(0);
-    // }
+  
     let turn = 0;
     
+    for (let i = 0; i < alldata[id].length; i++) {
+       alldata[id][i][1] = 0;
+      
+    }
     io.to(id).emit("reset-scores",alldata[id],id);
     
     
@@ -251,12 +222,20 @@ io.on("connection", (socket) => {
        }, (cnt+ round_duration+8)*1000*(players));
 
 
+
+
+  })
+
+  socket.on("hide-after-8-sec",(id)=>{
+    setTimeout(() => {
+      io.to(id).emit("change-vis-gameover",id);
+    }, 8*1000);
   })
 
 
   
 function countdown(seconds,id,whatmsg) {
-  // return new Promise((resolve, reject) => {
+
       let rem = seconds;
       io.to(id).emit(whatmsg,rem,id);
 
@@ -267,14 +246,14 @@ function countdown(seconds,id,whatmsg) {
           if (rem <= 0) {
              if(whatmsg=="change-div-of-word-timer")
              {
-              io.to(id).emit('change-vis-of-match_over',id);
+              console.log(12345);
               io.to(id).emit('add-score-in-match_over',id,alldata[id]);
+              io.to(id).emit('change-vis-of-match_over',id);
              }
               clearInterval(interval)
           }
       }, 1000);
-  // });
-  // return 1;
+
 }
 
 });

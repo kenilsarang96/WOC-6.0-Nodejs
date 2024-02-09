@@ -35,7 +35,6 @@ form1.addEventListener('submit',(e)=>{
         });
         loginpage.style.visibility = 'hidden';    
          game.style.visibility = 'visible'
-        //  userid.value='';
         host = userid.value;
         }
         
@@ -62,7 +61,7 @@ form1.addEventListener('submit',(e)=>{
 
 sendbtn.addEventListener('click',(e)=>{
     e.preventDefault();
-    // console.log(usermsg.value);
+
     if(usermsg.value)
     {
         socket.emit('chat',usermsg.value,userid.value,id)
@@ -96,8 +95,7 @@ form2.addEventListener('submit',(e)=>{
         userid.value = joinroomusername.value;
         loginpage.style.visibility = 'hidden';
          game.style.visibility = 'visible'
-        //  roomid.value='';
-        //  joinroomusername.value='';
+        
     }
 })
 
@@ -107,7 +105,7 @@ leave_btn.addEventListener('click',(e)=>{
     socket.emit('leave-room',id,userid.value);
     loginpage.style.visibility = 'visible';
     game.style.visibility = 'hidden'
-    // messages.innerHTML='';
+   
 })
 
         
@@ -123,19 +121,19 @@ function displayMessage(msg)
 
 
 
-socket.on('add-info-in-panel',(roomid,username,user_names,user_cnt)=>{
- console.log(user_panel);
+socket.on('add-info-in-panel',(user_names,id)=>{
+
 
  user_panel.innerHTML="";
  
  for (let i = 0; i< user_names.length; i++) {
-    if(user_names[i][0]!=roomid) continue;
+    
   let item = document.createElement('div');
-  item.id=`user_${roomid}_${user_names[i][1]}`;
+  item.id=`user_${id}_${user_names[i][0]}`;
  item.style.color = 'white'
  item.innerHTML=` <div class="flex gap-40 all-user-info"><img src="media/user.svg" width = "27px" alt="">
-                  <div id="info-name">${user_names[i][1]}</div>
-                  <div id="user_${roomid}_${user_names[i][1]}_score">0 </div>
+                  <div id="info-name">${user_names[i][0]}</div>
+                  <div id="user_${id}_${user_names[i][0]}_score">0 </div>
                   
                   
                   </div>
@@ -333,7 +331,7 @@ socket.on('show_chat', (msg,useriD,originalMsg) => {
         item.style.color = "orange";
         item.style.fontWeight ="bold";
         socket.emit("update_score",useriD,id);
-        // socket.emit("change-score-")
+     
     }
     else item.textContent = msg;
 
@@ -342,7 +340,7 @@ socket.on('show_chat', (msg,useriD,originalMsg) => {
     window.scrollTo(0, document.body.scrollHeight);
 })
 
-socket.on('change-it-to-write',(id,Username,user_names)=>{
+socket.on('change-it-to-write',(id,Username)=>{
 
     let user_div =  document.getElementById(`user_${id}_${Username}`);
     if (user_div) {
@@ -351,7 +349,7 @@ socket.on('change-it-to-write',(id,Username,user_names)=>{
  }
  
  })
- socket.on('change-it-to-user',(id,Username,user_names)=>{
+ socket.on('change-it-to-user',(id,Username)=>{
  
      console.log(Username);
      let user_div =  document.getElementById(`user_${id}_${Username}`);
@@ -378,6 +376,7 @@ let gameOver = document.getElementById("game_over");
 
 socket.on('GAME_OVER',(id)=>{
     gameOver.style.visibility ="visible";
+    socket.emit("hide-after-8-sec",id);
     
 })
 socket.on("change-vis-gameover",(id)=>{
@@ -405,18 +404,20 @@ socket.on('add-score-in-match_over',(roomid,all_room_members)=>{
    
     match_scores.innerHTML="";
     final_score.innerHTML="";
-    
+    console.log(12345);
     for (let i = 0; i< all_room_members.length; i++) {
 
      let item = document.createElement('div');
      let panel_item_score = document.getElementById(`user_${roomid}_${all_room_members[i][0]}_score`);
 
-     panel_item_score.innerText = "";
+     if (panel_item_score !== null) {
+        panel_item_score.innerText = "";
+    }
      panel_item_score.innerText = all_room_members[i][1];
 
     item.style.color = 'white'
-    item.innerHTML=` <div class="flex gap-40">
-                     <div class="width-58">${all_room_members[i][0]}</div>                    
+    item.innerHTML=` <div class="flex gap-40 score_spread">
+                     <div class="width-58 ">${all_room_members[i][0]}</div>                    
                      <div >${all_room_members[i][1]}</div>                    
                      
                      </div>
@@ -435,8 +436,10 @@ socket.on('add-score-in-match_over',(roomid,all_room_members)=>{
          for (let i = 0; i < all_room_members.length; i++) {
          
             let panel_item_score = document.getElementById(`user_${id}_${all_room_members[i][0]}_score`);
-            all_room_members[i][1] = 0;
-            panel_item_score.innerText = "";
+           
+            if (panel_item_score !== null) {
+                panel_item_score.innerText = "";
+            }
             panel_item_score.innerText = all_room_members[i][1];
          }
    })
