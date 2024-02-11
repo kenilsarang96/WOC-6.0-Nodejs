@@ -23,6 +23,7 @@ app.get("/", (req, res) => {
 // alldata[id] = [[username1,score],[username2,score]]
   
 let alldata={};
+let user_socketid={};
 
 
 io.on("connection", (socket) => {
@@ -35,11 +36,23 @@ io.on("connection", (socket) => {
   
     console.log("user disconnected");
 
+    
+    if(user_socketid[socket.id])
+    {
+      let id = user_socketid[socket.id][1];
+    const indexToRemove = alldata[id].findIndex(entry => entry[0] == user_socketid[socket.id][0]);
+    if (indexToRemove !== -1) {
+      alldata[id].splice(indexToRemove, 1);
+    }
+    io.to(id).emit("add-info-in-panel",alldata[id],id);
+  }
+
  
   });
   
   socket.on("join-room", (roomid, username, callback) => {
- 
+     
+    user_socketid[socket.id] = [username,roomid];
     if(alldata[roomid])alldata[roomid].push([username,0]);
     socket.join(roomid);
     io.to(roomid).emit("displayroom-id", roomid, username);
@@ -51,8 +64,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("create-room", (username, callback) => {
-   
     let roomid = socket.id.substring(0, 5);
+    user_socketid[socket.id] = [username,roomid];
    
     alldata[roomid] = [[username,0]];
     socket.join(roomid);
@@ -75,7 +88,7 @@ io.on("connection", (socket) => {
     io.to(id).emit("leavemsg", Username);
     socket.leave(id);
     
-    const indexToRemove = alldata[id].findIndex(entry => entry[0] == Username && entry[1] == 0);
+    const indexToRemove = alldata[id].findIndex(entry => entry[0] == Username);
     if (indexToRemove !== -1) {
       alldata[id].splice(indexToRemove, 1);
     }
@@ -151,12 +164,6 @@ io.on("connection", (socket) => {
     let round_duration = 20;
     
    io.to(id).emit("change-vis-gameover",id);
-  
-
-
-   
-    
-    
     
     let players = alldata[id].length;
     
@@ -180,21 +187,24 @@ io.on("connection", (socket) => {
       turn = turn+1;
      
       countdown(round_duration,id,"change-div-of-word-timer")
-      
-       
-        
-      
 
        }, cnt*1000);
        countdown(cnt,id,"change-div-of-timermsg");
-
-      
-     
+         let  f = 1;
 
            const interval = setInterval(() => {
                 
              const slug = generateSlug(1, { format: "title" });
-             io.to(id).emit("show_word_to_drawer",id,slug,alldata[id][turn][0]);
+             if(alldata[id][turn])io.to(id).emit("show_word_to_drawer",id,slug,alldata[id][turn][0]);
+             else
+             {
+              io.to(id).emit("GAME_OVER",id);
+              clearInterval(interval);
+              clearInterval(final);
+
+              f=0;
+              return;
+             }
              io.to(id).emit('change-vis-of-start',id);
              
             setTimeout(() => {
@@ -215,10 +225,9 @@ io.on("connection", (socket) => {
            }, (cnt+ round_duration+8)*1000);
      
 
-
-       setTimeout(() => {
-           io.to(id).emit("GAME_OVER",id);
-           clearInterval(interval);
+       const final = setTimeout(() => {
+          if(f){ io.to(id).emit("GAME_OVER",id);
+           clearInterval(interval);}
        }, (cnt+ round_duration+8)*1000*(players));
 
 
@@ -246,7 +255,6 @@ function countdown(seconds,id,whatmsg) {
           if (rem <= 0) {
              if(whatmsg=="change-div-of-word-timer")
              {
-              console.log(12345);
               io.to(id).emit('add-score-in-match_over',id,alldata[id]);
               io.to(id).emit('change-vis-of-match_over',id);
              }
