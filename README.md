@@ -3,6 +3,10 @@
 
 The game allows users to create or join rooms, where one player draws on a canvas based on a given word, and others guess the word from the drawing.
 
+Game link:
+```bash
+  https://kpicgame.onrender.com
+```
 
 
 ## Installation
