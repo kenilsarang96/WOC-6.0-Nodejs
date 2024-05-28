@@ -3,7 +3,7 @@ const { createServer } = require("http");
 const path = require("path");
 const { Server } = require("socket.io");
 const { generateSlug } = require("random-word-slugs");
-
+const port = 3000 || process.env.port;
 
 const app = express();
 
@@ -13,13 +13,32 @@ const io = new Server(server, {
   connectionStateRecover: {},
 });
 
-app.use(express.static(path.join(__dirname, "public")));
+
+
+// app.use(express.static(path.join(__dirname, "public")));
+
+// app.get("/", (req, res) => {
+//   res.sendFile(path.join(__dirname, "public", "index.html"));
+// });
+
+app.use(express.static('public'));
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile("public/index.html",{root : __dirname});
 });
 
+const slugOptions = {
+  partsOfSpeech: ["noun"],
+  categories: {
+    noun: ["animals", "food", "science", "sports", "technology", "thing"],
+  }
+}
+const generateRandomWord = () => {
+  return generateSlug(1, slugOptions).toLowerCase();
+}
 
+
+// data is storeded like this
 // alldata[id] = [[username1,score],[username2,score]]
   
 let alldata={};
@@ -36,7 +55,6 @@ io.on("connection", (socket) => {
   
     console.log("user disconnected");
 
-    
     if(user_socketid[socket.id])
     {
       let id = user_socketid[socket.id][1];
@@ -49,6 +67,8 @@ io.on("connection", (socket) => {
 
  
   });
+
+
   
   socket.on("join-room", (roomid, username, callback) => {
      
@@ -84,6 +104,7 @@ io.on("connection", (socket) => {
       io.to(room).emit("show_chat", userid + " : " + msg,userid,msg);
   });
 
+
   socket.on("leave-room", (id, Username) => {
     io.to(id).emit("leavemsg", Username);
     socket.leave(id);
@@ -95,6 +116,7 @@ io.on("connection", (socket) => {
     io.to(id).emit("add-info-in-panel",alldata[id],id);
   });
 
+
   socket.on("draw", (x, y, id) => {
    
       io.to(id).emit("ondraw", x, y);
@@ -104,30 +126,21 @@ io.on("connection", (socket) => {
 
 
   socket.on("down", (x, y, id) => {
-    
       io.to(id).emit("ondown", x, y);
-    
   });
   
+  
   socket.on('change-b_size',(b_size,id)=>{
-    
- 
       io.to(id).emit("apply-b_size",b_size);
-    
-
   });
+
   socket.on('change-b_color',(b_color,id)=>{
- 
       io.to(id).emit("apply-b_color",b_color);
-    
-
   });
-  socket.on('erase_all',(id)=>{
-    
-    
-      io.to(id).emit("apply-erase",id);
-    
 
+  
+  socket.on('erase_all',(id)=>{ 
+      io.to(id).emit("apply-erase",id);
   });
 
 
@@ -147,12 +160,14 @@ io.on("connection", (socket) => {
     },(7.5)*1000);
   })
 
-  socket.on("update_score",(useriD,id)=>{
+  socket.on("update_score",(useriD,id,remaining_time)=>{
 
      for (let i = 0; i < alldata[id].length; i++) {
+
         if(useriD==alldata[id][i][0])
         {
-          alldata[id][i][1] = alldata[id][i][1] +100;
+         
+          alldata[id][i][1]+= Math.floor(((remaining_time/20))*20);
           break;
         }
      }
@@ -160,24 +175,31 @@ io.on("connection", (socket) => {
  
   
   socket.on("start_game",(id)=>{
+
     let cnt = 5;
     let round_duration = 20;
-    
-   io.to(id).emit("change-vis-gameover",id);
+    io.to(id).emit("change-vis-gameover",id);
+    io.to(id).emit("clear_old_chat");
     
     let players = alldata[id].length;
     
-  
+    
     let turn = 0;
     
     for (let i = 0; i < alldata[id].length; i++) {
-       alldata[id][i][1] = 0;
-      
+      alldata[id][i][1] = 0;
     }
+
+
     io.to(id).emit("reset-scores",alldata[id],id);
     
+    io.to(id).emit("user_can_draw",id,alldata[id][turn][0]);
     
-    const slug = generateSlug(1, { format: "title" });
+    // setup for generating random words
+    
+    
+    const slug = generateRandomWord();
+
     io.to(id).emit('show_word_to_drawer',id,slug,alldata[id][turn][0]);
     io.to(id).emit('change-vis-of-start',id);
 
@@ -189,13 +211,20 @@ io.on("connection", (socket) => {
       countdown(round_duration,id,"change-div-of-word-timer")
 
        }, cnt*1000);
+
+
+
        countdown(cnt,id,"change-div-of-timermsg");
          let  f = 1;
 
            const interval = setInterval(() => {
                 
              const slug = generateSlug(1, { format: "title" });
-             if(alldata[id][turn])io.to(id).emit("show_word_to_drawer",id,slug,alldata[id][turn][0]);
+             if(alldata[id][turn])
+             {
+              io.to(id).emit("show_word_to_drawer",id,slug,alldata[id][turn][0]);
+              io.to(id).emit("user_can_draw",id,alldata[id][turn][0]);
+             }
              else
              {
               io.to(id).emit("GAME_OVER",id);
@@ -266,7 +295,7 @@ function countdown(seconds,id,whatmsg) {
 
 });
 
-server.listen(3000, () => {
+server.listen(port, () => {
   console.log("server running at http://localhost:3000");
 });
 

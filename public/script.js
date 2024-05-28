@@ -1,32 +1,27 @@
 const socket = io();
 
 const userid = document.getElementById('create-room-username'); // creater
-
 const form1 = document.getElementById('create-room');
-
 const loginpage = document.getElementById('loginpage');
 const game= document.getElementById('Game');
-
 const usermsg = document.getElementById('msg');
 const sendbtn = document.getElementById('send-btn');
 const messages = document.getElementById('messages');
-
 const joinroomusername = document.getElementById('join-room-username'); //joiner
 const roomid = document.getElementById('room-id');
 const joinbtn = document.getElementById('join-room-btn');
 const leave_btn = document.getElementById('leavebtn');
 const displayRoomid = document.getElementById('displayroomid');
-
 const form2 = document.getElementById('join-room');
-
 const user_panel = document.querySelector('.allusers');
 
 let host;
+let drawer;
 
 form1.addEventListener('submit',(e)=>{
-
+    
     e.preventDefault();
-
+    
     if(userid.value)
     {
         socket.emit('create-room',userid.value,msg=>{
@@ -34,30 +29,35 @@ form1.addEventListener('submit',(e)=>{
             displayMessage(msg);
         });
         loginpage.style.visibility = 'hidden';    
-         game.style.visibility = 'visible'
+        game.style.visibility = 'visible'
         host = userid.value;
-        }
-        
-    })
+        drawer = host;
+    }
     
-    let id;
+})
 
-    let Username;
+let id;
+let Username;
+
+socket.on('displayroom-id',(roomID,username)=>{
+    id = roomID;
+    Username = username;
+    displayRoomid.innerText=`ROOM ID : ${id} `;
+    const item = document.createElement('li');
+    item.textContent =  `${Username} is joined`;
+    item.style.color = 'green';
+    item.style.fontWeight ='bold';
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
     
-    socket.on('displayroom-id',(roomID,username)=>{
-        id = roomID;
-        Username = username;
-        displayRoomid.innerText=`ROOM ID : ${id} `;
-        const item = document.createElement('li');
-        item.textContent =  `${Username} is joined`;
-        item.style.color = 'green';
-        item.style.fontWeight ='bold';
-        messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
-        
-        
-       })
+    
+})
 
+displayRoomid.addEventListener("click",(e)=>{
+
+    navigator.clipboard.writeText
+    (`${id}`);
+})
 
 sendbtn.addEventListener('click',(e)=>{
     e.preventDefault();
@@ -68,6 +68,7 @@ sendbtn.addEventListener('click',(e)=>{
         usermsg.value ='';
     }
 })
+
 
 
 socket.on('leavemsg',(username)=>{
@@ -130,10 +131,11 @@ socket.on('add-info-in-panel',(user_names,id)=>{
     
   let item = document.createElement('div');
   item.id=`user_${id}_${user_names[i][0]}`;
- item.style.color = 'white'
+  item.className="user_detail";
+ item.style.color = 'white';
  item.innerHTML=` <div class="flex gap-40 all-user-info"><img src="media/user.svg" width = "27px" alt="">
                   <div id="info-name">${user_names[i][0]}</div>
-                  <div id="user_${id}_${user_names[i][0]}_score">0 </div>
+                  <div id="user_${id}_${user_names[i][0]}_score"> 0 </div>
                   
                   
                   </div>
@@ -216,7 +218,7 @@ socket.on('ondown',(x,y)=>{
 })
 
 socket.on('apply-b_size',(e)=>{
-    ctx.lineWidth =e;
+   ctx.lineWidth =e;
     brush_size.value =e;
     b_size=e;
 })
@@ -230,16 +232,24 @@ window.onmousemove = (e) => {
     y = e.clientY - rect.top;
     ctx.strokeStyle = b_color;
     ctx.lineWidth = b_size;
-    if (mouseDown) {
-        socket.emit('draw',x,y,id);
-        ctx.lineTo(x, y);
-        ctx.stroke();
+ 
+    if(mouseDown)
+    {
+        if(drawer==userid.value) 
+        {
+            socket.emit('draw',x,y,id);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        }   
     }
+
+    
+    
 };
 
 clear_btn.addEventListener("click",(e)=>{
-    socket.emit('erase_all',id);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+   if(drawer==userid.value) {socket.emit('erase_all',id);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);}
 })
 
 socket.on("apply-erase",(id)=>{
@@ -275,12 +285,11 @@ socket.on('change-vis-of-start',(id)=>{
 
 
 
-
 socket.on('change-vis-of-start_to_hide',(id,name)=>{
     start_display.style.visibility ="hidden";
     console.log(name);
     const item = document.createElement('li');
-    item.innerText = `${name} is drwaing`;
+    item.innerText = `${name} is drawing`;
     item.style.color = "yellow";
     messages.appendChild(item);
 })
@@ -294,6 +303,11 @@ socket.on('change-div-of-word-timer',(rem,id)=>{
 
 let curr_word;
 let curr_turn;
+
+socket.on("user_can_draw",(id,drawer_name)=>{
+     
+     drawer = drawer_name;
+})
 socket.on("show_word_to_drawer",(id,w,user_name)=>{
     
     who_are_drawing.innerText ="";
@@ -302,6 +316,7 @@ socket.on("show_word_to_drawer",(id,w,user_name)=>{
     word.innerText="";
     curr_word = w;
     curr_turn = user_name;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
      if(user_name===userid.value)
      {
           socket.emit('change-svg-to-write',id,userid.value);
@@ -322,6 +337,7 @@ socket.on("show_word_to_drawer",(id,w,user_name)=>{
         }
      }
 })
+
 socket.on('show_chat', (msg,useriD,originalMsg) => {
     const item = document.createElement('li');
     
@@ -330,7 +346,7 @@ socket.on('show_chat', (msg,useriD,originalMsg) => {
         item.textContent  = ` ${useriD} has correctly guessed !`;
         item.style.color = "orange";
         item.style.fontWeight ="bold";
-        socket.emit("update_score",useriD,id);
+        socket.emit("update_score",useriD,id,tasktimer.innerText);
      
     }
     else item.textContent = msg;
@@ -340,6 +356,11 @@ socket.on('show_chat', (msg,useriD,originalMsg) => {
     window.scrollTo(0, document.body.scrollHeight);
 })
 
+
+socket.on('clear_old_chat',()=>{
+
+    messages.innerText="";
+})
 socket.on('change-it-to-write',(id,Username)=>{
 
     let user_div =  document.getElementById(`user_${id}_${Username}`);
@@ -404,7 +425,7 @@ socket.on('add-score-in-match_over',(roomid,all_room_members)=>{
    
     match_scores.innerHTML="";
     final_score.innerHTML="";
-    console.log(12345);
+
     for (let i = 0; i< all_room_members.length; i++) {
 
      let item = document.createElement('div');

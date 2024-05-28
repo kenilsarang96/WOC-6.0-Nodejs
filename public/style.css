@@ -7,7 +7,7 @@
 }
 body{
     font-family: 'Poppins', sans-serif;
-    background-color: rgb(29 29 31);
+    background-color: rgb(24, 24, 42);
     overflow: hidden;
     cursor: pointer;
 
@@ -116,6 +116,9 @@ button:hover{
     height: 80vh;
     width: 20vw;
     overflow: auto;
+}
+.user_detail{
+    margin-left: 20px;
 }
 
 .btns{
@@ -232,8 +235,8 @@ button:hover{
 .drops{
   position: absolute;
   top: 0;
-  width: 99vw;
-  height: 98vh;
+  width: 100vw;
+  height: 100vh;
   
   color: rgb(255, 253, 253);
   justify-content: center;
