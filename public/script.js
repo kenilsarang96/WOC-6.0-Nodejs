@@ -227,14 +227,13 @@ window.onmousemove = (e) => {
     y = e.clientY - rect.top;
     ctx.strokeStyle = b_color;
     ctx.lineWidth = b_size;
- 
     if(mouseDown)
     {
         if(drawer==userid.value) 
         {
             socket.emit('draw',x,y,id);
-            ctx.lineTo(x, y);
-            ctx.stroke();
+            // ctx.lineTo(x, y);
+            // ctx.stroke();
         }   
     }
 };
@@ -243,7 +242,6 @@ clear_btn.addEventListener("click",(e)=>{
    if(drawer==userid.value) {socket.emit('erase_all',id);
     ctx.clearRect(0, 0, canvas.width, canvas.height);}
 })
-
 socket.on("apply-erase",(id)=>{
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 })
