@@ -81,22 +81,21 @@ socket.on('leavemsg',(username)=>{
 
 
 
-form2.addEventListener('submit',(e)=>{
-        
+form2.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    console.log(roomid.value && joinroomusername.value)
-    if(roomid.value!=null && joinroomusername.value!=null)
-    {
-        socket.emit('join-room',roomid.value,joinroomusername.value,msg=>{
-            displayMessage(msg);
+    if (roomid.value && joinroomusername.value) {
+        socket.emit('join-room', roomid.value, joinroomusername.value, (error) => {
+            if (error) {
+                roomid.value = "Room does not exist";
+            } else {
+                userid.value = joinroomusername.value;
+                loginpage.style.visibility = 'hidden';
+                game.style.visibility = 'visible';
+            }
         });
-        userid.value = joinroomusername.value;
-        loginpage.style.visibility = 'hidden';
-         game.style.visibility = 'visible'
-        
     }
-})
+});
 
 
 
@@ -162,13 +161,16 @@ let b_color= brush_color.value;
 brush_size.addEventListener("input",(e)=>{
     
     b_size= brush_size.value ;
-
+    if(drawer==userid.value) {
     socket.emit('change-b_size',b_size,id);
+   }
 })
 brush_color.addEventListener("input",(e)=>{
     
     b_color= brush_color.value ;
+    if(drawer==userid.value) {
     socket.emit('change-b_color',b_color,id);
+    }
 })
 
 
@@ -232,8 +234,6 @@ window.onmousemove = (e) => {
         if(drawer==userid.value) 
         {
             socket.emit('draw',x,y,id);
-            // ctx.lineTo(x, y);
-            // ctx.stroke();
         }   
     }
 };
@@ -263,6 +263,12 @@ let word= document.getElementById("word");
 start_btn.addEventListener("click",(e)=>{
     if(host!=null)
     {
+    socket.emit("check",id);
+    }
+})
+
+socket.on("checkOk",(id)=>{
+    if(host!=null){
     socket.emit("start_game",id);
     }
 })
@@ -330,16 +336,23 @@ socket.on("show_word_to_drawer",(id,w,user_name)=>{
 
 socket.on('show_chat', (msg,useriD,originalMsg) => {
     const item = document.createElement('li');
-    
-    if((originalMsg)==(curr_word))
+    let f  =0;
+    if(curr_word != null){
+      if((originalMsg.toString().toLowerCase())==(curr_word.toString().toLowerCase())) f =1;
+    }
+    if(f)
     {
+        item.style.fontWeight ="bold";
         item.textContent  = ` ${useriD} has correctly guessed !`;
         item.style.color = "orange";
-        item.style.fontWeight ="bold";
         socket.emit("update_score",useriD,id,tasktimer.innerText);
-     
     }
-    else item.textContent = msg;
+    else 
+    {
+        item.textContent = msg;
+        item.style.color = "blue";
+        item.style.fontWeight ="bold";
+    }
 
     messages.appendChild(item);
     console.log(messages);
@@ -405,11 +418,8 @@ newgame.addEventListener("click",(e)=>{
 
 
 //score distribution
-
-
 let match_scores = document.getElementById("player_scores");
 let final_score = document.getElementById("final_scores");
-
 
 socket.on('add-score-in-match_over',(roomid,all_room_members)=>{
    
@@ -429,18 +439,14 @@ socket.on('add-score-in-match_over',(roomid,all_room_members)=>{
     item.style.color = 'white'
     item.innerHTML=` <div class="flex gap-40 score_spread">
                      <div class="width-58 ">${all_room_members[i][0]}</div>                    
-                     <div >${all_room_members[i][1]}</div>                    
-                     
+                     <div >${all_room_members[i][1]}</div>                      
                      </div>
                      `;
-   
                      match_scores.appendChild(item);
-    
-                   let clonedItem = item.cloneNode(true);
+                     let clonedItem = item.cloneNode(true);
                      final_score.appendChild(clonedItem);
-        }
-   
-   })
+                   }
+    })
 
 
    socket.on("reset-scores",(all_room_members,id)=>{

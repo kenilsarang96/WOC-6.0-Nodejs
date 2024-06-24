@@ -11,13 +11,6 @@ const io = new Server(server, {
   connectionStateRecover: {},
 });
 
-
-// app.use(express.static(path.join(__dirname, "public")));
-
-// app.get("/", (req, res) => {
-//   res.sendFile(path.join(__dirname, "public", "index.html"));
-// });
-
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
@@ -34,6 +27,24 @@ const generateRandomWord = () => {
   return generateSlug(1, slugOptions).toLowerCase();
 };
 
+function countdown(seconds, id, whatmsg) {
+  let rem = seconds;
+  io.to(id).emit(whatmsg, rem, id);
+
+  const interval = setInterval(() => {
+    rem--;
+    io.to(id).emit(whatmsg, rem, id);
+
+    if (rem <= 0) {
+      if (whatmsg == "change-div-of-word-timer") {
+        io.to(id).emit("add-score-in-match_over", id, alldata[id]);
+        io.to(id).emit("change-vis-of-match_over", id);
+      }
+      clearInterval(interval);
+    }
+  }, 1000);
+}
+
 // data is storeded like this
 // alldata[id] = [[username1,score],[username2,score]]
 
@@ -46,26 +57,39 @@ io.on("connection", (socket) => {
   console.log("a user is connected");
 
   socket.on("disconnect", () => {
-    console.log("user disconnected");
-    if (user_socketid[socket.id]) {
-      let id = user_socketid[socket.id][1];
-      const indexToRemove = alldata[id].findIndex(
-        (entry) => entry[0] == user_socketid[socket.id][0]
-      );
-      if (indexToRemove !== -1) {
-        alldata[id].splice(indexToRemove, 1);
+    let userInfo = user_socketid[socket.id];
+    if (userInfo) {
+      let username = userInfo[0];
+      let roomid = userInfo[1];
+      delete user_socketid[socket.id];
+      io.to(roomid).emit("leavemsg", username);
+
+      if (alldata[roomid]) {
+        alldata[roomid] = alldata[roomid].filter(
+          (user) => user[0] !== username
+        );
+        if (alldata[roomid].length === 0) {
+          delete alldata[roomid];
+        } else {
+          io.to(roomid).emit("add-info-in-panel", alldata[roomid], roomid);
+        }
       }
-      io.to(id).emit("add-info-in-panel", alldata[id], id);
     }
   });
 
   socket.on("join-room", (roomid, username, callback) => {
-    user_socketid[socket.id] = [username, roomid];
-    if (alldata[roomid]) alldata[roomid].push([username, 0]);
-    socket.join(roomid);
-    io.to(roomid).emit("displayroom-id", roomid, username);
-    //  callback(`${username} is joined`);
-    io.to(roomid).emit("add-info-in-panel", alldata[roomid], roomid);
+    if (alldata[roomid]) {
+      // Check if room exists
+      user_socketid[socket.id] = [username, roomid];
+      alldata[roomid].push([username, 0]);
+      socket.join(roomid);
+
+      io.to(roomid).emit("add-info-in-panel", alldata[roomid], roomid);
+      io.to(roomid).emit("displayroom-id", roomid, username);
+      callback(null); // No error
+    } else {
+      callback("Room does not exist"); // Send error message
+    }
   });
 
   socket.on("create-room", (username, callback) => {
@@ -83,17 +107,18 @@ io.on("connection", (socket) => {
     io.to(room).emit("show_chat", userid + " : " + msg, userid, msg);
   });
 
-  socket.on("leave-room", (id, Username) => {
-    io.to(id).emit("leavemsg", Username);
-    socket.leave(id);
+  socket.on("leave-room", (roomid, Username) => {
+    io.to(roomid).emit("leavemsg", Username);
+    socket.leave(roomid);
 
-    const indexToRemove = alldata[id].findIndex(
-      (entry) => entry[0] == Username
-    );
-    if (indexToRemove !== -1) {
-      alldata[id].splice(indexToRemove, 1);
+    if (alldata[roomid]) {
+      alldata[roomid] = alldata[roomid].filter((user) => user[0] !== Username);
+      if (alldata[roomid].length === 0) {
+        delete alldata[roomid];
+      } else {
+        io.to(roomid).emit("add-info-in-panel", alldata[roomid], roomid);
+      }
     }
-    io.to(id).emit("add-info-in-panel", alldata[id], id);
   });
 
   socket.on("draw", (x, y, id) => {
@@ -133,18 +158,23 @@ io.on("connection", (socket) => {
   socket.on("update_score", (useriD, id, remaining_time) => {
     for (let i = 0; i < alldata[id].length; i++) {
       if (useriD == alldata[id][i][0]) {
-        alldata[id][i][1] += Math.floor((remaining_time / 20) * 20);
+        alldata[id][i][1] += Math.floor((remaining_time / 60) * 60);
         break;
       }
     }
   });
 
+  socket.on("check",(id)=>{
+    if(alldata[id].length > 1) io.to(id).emit("checkOk",id)
+  })
+
   socket.on("start_game", (id) => {
     let cnt = 5;
-    let round_duration = 20;
+    let round_duration = 60;
     io.to(id).emit("change-vis-gameover", id);
     io.to(id).emit("clear_old_chat");
-
+    
+     
     let players = alldata[id].length;
 
     let turn = 0;
@@ -156,8 +186,6 @@ io.on("connection", (socket) => {
     io.to(id).emit("reset-scores", alldata[id], id);
 
     io.to(id).emit("user_can_draw", id, alldata[id][turn][0]);
-
-    // setup for generating random words
 
     const slug = generateRandomWord();
 
@@ -216,23 +244,6 @@ io.on("connection", (socket) => {
     }, 8 * 1000);
   });
 
-  function countdown(seconds, id, whatmsg) {
-    let rem = seconds;
-    io.to(id).emit(whatmsg, rem, id);
-
-    const interval = setInterval(() => {
-      rem--;
-      io.to(id).emit(whatmsg, rem, id);
-
-      if (rem <= 0) {
-        if (whatmsg == "change-div-of-word-timer") {
-          io.to(id).emit("add-score-in-match_over", id, alldata[id]);
-          io.to(id).emit("change-vis-of-match_over", id);
-        }
-        clearInterval(interval);
-      }
-    }, 1000);
-  }
 });
 
 server.listen(port, () => {
